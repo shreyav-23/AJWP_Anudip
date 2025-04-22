@@ -9,7 +9,7 @@ public class TodoApp extends JFrame {
     private JList<Task> taskList;
     private JTextField taskInput;
     private JComboBox<String> categoryDropdown;
-    private GradientButton addButton, removeButton;
+    private ButtonColor addButton, removeButton;
 
     private Connection conn;
 
@@ -26,24 +26,16 @@ public class TodoApp extends JFrame {
     }
 
     private void TodoUI() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {}
 
         Font font = new Font("Segoe UI", Font.PLAIN, 16);
-        Color bgColor = Color.decode("#FFB8E0");
-        Color primaryColor = Color.decode("#BE5985");
-        Color cardColor = Color.decode("#FFEDFA");
 
         JPanel root = new JPanel();
         root.setLayout(new BoxLayout(root, BoxLayout.Y_AXIS));
-        root.setBackground(bgColor);
         root.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(root);
 
         JLabel title = new JLabel("To-Do List");
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        title.setForeground(Color.BLACK);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         root.add(title);
         root.add(Box.createVerticalStrut(20));
@@ -52,11 +44,8 @@ public class TodoApp extends JFrame {
         taskList = new JList<>(taskListModel);
         taskList.setCellRenderer(new TaskRenderer());
         taskList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        taskList.setBackground(cardColor);
-        taskList.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true));
 
         JScrollPane scroll = new JScrollPane(taskList);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
         root.add(scroll);
         root.add(Box.createVerticalStrut(20));
 
@@ -77,7 +66,6 @@ public class TodoApp extends JFrame {
         });
 
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
-        inputPanel.setBackground(cardColor);
         inputPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 new EmptyBorder(15, 15, 15, 15)
@@ -85,20 +73,16 @@ public class TodoApp extends JFrame {
 
         taskInput = new JTextField();
         taskInput.setFont(font);
-        taskInput.setForeground(Color.BLACK);
-        taskInput.setPreferredSize(new Dimension(3, 3));  // Set a shorter height (30), width can be adjusted
-
+        taskInput.setPreferredSize(new Dimension(3, 3));
 
         categoryDropdown = new JComboBox<>(new String[]{"General", "Work", "Personal", "Doo Later", "Urgent"});
         categoryDropdown.setFont(font);
-        categoryDropdown.setBackground(Color.WHITE);
 
         JPanel topInput = new JPanel(new BorderLayout(10, 10));
-        topInput.setOpaque(false);
         topInput.add(taskInput, BorderLayout.CENTER);
         topInput.add(categoryDropdown, BorderLayout.EAST);
 
-        addButton = new GradientButton("Add Task");
+        addButton = new ButtonColor("Add Task");
 
         inputPanel.add(topInput, BorderLayout.CENTER);
         inputPanel.add(addButton, BorderLayout.SOUTH);
@@ -106,10 +90,9 @@ public class TodoApp extends JFrame {
         root.add(Box.createVerticalStrut(15));
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
-        btnRow.setOpaque(false);
 
-        GradientButton editButton = new GradientButton("Edit Selected Task");
-        removeButton = new GradientButton("Remove Selected Task");
+        ButtonColor editButton = new ButtonColor("Edit Selected Task");
+        removeButton = new ButtonColor("Remove Selected Task");
 
         btnRow.add(editButton);
         btnRow.add(removeButton);
@@ -259,56 +242,27 @@ public class TodoApp extends JFrame {
 
             label = new JLabel();
             label.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-            label.setForeground(Color.BLACK);
 
             add(checkBox, BorderLayout.WEST);
             add(label, BorderLayout.CENTER);
         }
 
         @Override
-        public Component getListCellRendererComponent(JList<? extends Task> list, Task value, int index,
-                                                      boolean isSelected, boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList<? extends Task> list, Task value, int index, boolean isSelected, boolean cellHasFocus) {
             checkBox.setSelected(value.done);
-            label.setText("<html><b>" + value.description + "</b> <span style='color:gray;'>[" + value.category + "]</span></html>");
-            label.setForeground(value.done ? Color.GRAY : Color.BLACK);
-
-            setBackground(isSelected ? new Color(230, 240, 255) : Color.WHITE);
-
-            setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
-                    new EmptyBorder(10, 15, 10, 15)
-            ));
-
+            label.setText("<html><b>" + value.description + "</b> <span>[" + value.category + "]</span></html>");
+            setBackground(isSelected ? UIManager.getColor("List.selectionBackground") : UIManager.getColor("List.background"));
             return this;
         }
     }
 
-    class GradientButton extends JButton {
-        private final Color color1 = Color.decode("#BE5985");
-        private final Color color2 = Color.decode("#BE5985");
-
-        public GradientButton(String text) {
+    class ButtonColor extends JButton {
+        public ButtonColor(String text) {
             super(text);
             setFont(new Font("Segoe UI", Font.BOLD, 16));
-            setForeground(Color.BLACK);
-            setContentAreaFilled(false);
+            setContentAreaFilled(true);
             setFocusPainted(false);
-            setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2d = (Graphics2D) g.create();
-            int w = getWidth();
-            int h = getHeight();
-
-            GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
-            g2d.setPaint(gp);
-            g2d.fillRoundRect(0, 0, w, h, 20, 20);
-
-            super.paintComponent(g2d);
-            g2d.dispose();
         }
     }
 }
